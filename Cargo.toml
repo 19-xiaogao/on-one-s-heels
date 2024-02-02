@@ -9,3 +9,4 @@ edition = "2021"
 ethers = {version = "2.0.13", features = ["ws"] }
 tokio = { version = "1", features = ["full"] }
 eyre = "0.6"
+config="0.10.1"
