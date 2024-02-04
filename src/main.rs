@@ -1,27 +1,6 @@
 use ethers::prelude::*;
 mod config;
 mod subscription;
-
-use std::sync::Arc;
-const WSS_URL: &str = "wss://ethereum.publicnode.com";
-
-abigen!(
-    UniswapFactroy,
-    r#"[
-         event PoolCreated(address indexed token0, address indexed token1,uint24 indexed fee,int24 tickSpacing,address pool)
-    ]"#,
-);
-
-abigen!(
-    UniswapPool,
-    r#"[
-        event Swap(address indexed sender,address indexed recipient,int256 amount0,int256 amount1,uint160 sqrtPriceX96,uint128 liquidity,int24 tick)
-        function balance0() external view returns (uint256)
-        function balance1() external view returns (uint256)
-    ]"#,
-);
-
-const UNISWAP_FACTORY_ADDRESS: &str = "0x1f98431c8ad98523631ae4a59f267346ea31f984";
 const UNISWAP_POOL_ADDRESS: &str = "0x331399c614cA67DEe86733E5A2FBA40DbB16827c";
 
 //  需求: 监听 uniswap V3 factory 池子的创建。当第一次流动性的token 大于某值的时候, 买入一笔交易。
@@ -30,27 +9,13 @@ async fn main() -> eyre::Result<()> {
     let config =
     config::read_config().unwrap_or_else(|err| panic!("read config file error:{}", err));
 
-    let provider = Provider::<Ws>::connect(WSS_URL).await?;
-    let client = Arc::new(provider);
-    let uniswap_pool_address: Address = UNISWAP_POOL_ADDRESS.parse()?;
-    let pool_contract = UniswapPool::new(uniswap_pool_address, client.clone());
-
+         let client = subscription::create_client( &config.ws_url).await.unwrap();
+         let uniswap_pool_address: Address = UNISWAP_POOL_ADDRESS.parse().unwrap();
+            let uniswap_factory_address :Address = config.uniswap_factory_v3_address.parse().unwrap();
     loop {
-        if let Ok(_balance0) = pool_contract.balance_0().call().await {
-            println!("sender:{}?", _balance0);
-        }
+        // subscription::subscription_pool_swap(uniswap_pool_address, &client).await.expect("TODO: panic message");
 
-        let events = pool_contract.event::<SwapFilter>().from_block(19117504);
-        let mut stream = events.stream().await?.take(1);
-        while let Some(Ok(f)) = stream.next().await {
-            println!("sender:{}", f.sender);
-            println!("recipient:{}", f.recipient);
-            println!("amount_0:{}", f.amount_0);
-            println!("amount_1::{}", f.amount_1);
-            println!("sqrt_price_x96:::{}", f.sqrt_price_x96);
-            println!("liquidity::::{}", f.liquidity);
-            println!("tick::::{}", f.tick);
-            println!("---------------------------------------------------------");
-        }
+        let pool_create = subscription::subscription_factory_pool_create(uniswap_factory_address, &client).await.expect("todo:err");
+        println!("pool create :{:?}",pool_create);
     }
 }
