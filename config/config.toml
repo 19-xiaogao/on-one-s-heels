@@ -9,6 +9,7 @@
         gas_price = 1000
 
 [goerli]
-
+        chain_id = 5
+        ws_url = "wss://ethereum-goerli.publicnode.com"
 
 
