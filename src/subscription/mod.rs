@@ -1,16 +1,17 @@
 use ethers::contract::abigen;
 use ethers::prelude::{Address, Provider, StreamExt, Ws};
+use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 mod client;
 pub(crate) use client::*;
 
-#[derive(Debug)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct PoolCreate {
-    token0: Address,
-    token1: Address,
-    fee: u16,
-    tick_spacing: i16,
-    pool_address: Address,
+    pub token0: String,
+    pub token1: String,
+    pub fee: u16,
+    pub tick_spacing: i16,
+    pub pool_address: String,
 }
 
 // 订阅池子创建
@@ -40,11 +41,11 @@ pub async fn subscription_factory_pool_create(
     };
 
     while let Some(Ok(val)) = stream.next().await {
-        pool_create.token0 = val.token_0;
-        pool_create.token1 = val.token_1;
+        pool_create.token0 = val.token_0.to_string();
+        pool_create.token1 = val.token_1.to_string();
         pool_create.fee = val.fee as u16;
         pool_create.tick_spacing = val.tick_spacing as i16;
-        pool_create.pool_address = val.pool;
+        pool_create.pool_address = val.pool.to_string();
     }
 
     Ok(pool_create)
