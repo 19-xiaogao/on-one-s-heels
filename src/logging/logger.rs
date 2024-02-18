@@ -29,7 +29,7 @@ pub fn init_log(log_dir: &str) -> io::Result<()> {
     Ok(())
 }
 
-pub fn log_info(message: &str) {
+pub fn _log_info(message: &str) {
     log::info!("{}", message);
 }
 

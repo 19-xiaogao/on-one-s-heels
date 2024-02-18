@@ -13,24 +13,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ListeningPool"
-version = "0.1.0"
-dependencies = [
- "actix-web",
- "config",
- "dotenvy",
- "env_logger",
- "ethers",
- "eyre",
- "log",
- "sea-orm",
- "sea-orm-migration",
- "serde 1.0.196",
- "tokio",
- "web3",
-]
-
-[[package]]
 name = "actix-codec"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5444,6 +5426,24 @@ name = "unicode_categories"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39ec24b3121d976906ece63c9daad25b85969647682eee313cb5779fdd69e14e"
+
+[[package]]
+name = "uniswap_v3_listen"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+ "config",
+ "dotenvy",
+ "env_logger",
+ "ethers",
+ "eyre",
+ "log",
+ "sea-orm",
+ "sea-orm-migration",
+ "serde 1.0.196",
+ "tokio",
+ "web3",
+]
 
 [[package]]
 name = "untrusted"

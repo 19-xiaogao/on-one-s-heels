@@ -4,7 +4,7 @@ mod logging;
 mod migrator;
 mod models;
 mod subscription;
-const UNISWAP_POOL_ADDRESS: &str = "0x331399c614cA67DEe86733E5A2FBA40DbB16827c";
+
 
 //  需求: 监听 uniswap V3 factory 池子的创建。当第一次流动性的token 大于某值的时候, 买入一笔交易。
 #[tokio::main]

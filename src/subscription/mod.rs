@@ -1,33 +1,37 @@
-use std::sync::Arc;
 use ethers::contract::abigen;
 use ethers::prelude::{Address, Provider, StreamExt, Ws};
+use std::sync::Arc;
 mod client;
 pub(crate) use client::*;
 
 #[derive(Debug)]
 pub struct PoolCreate {
-    token0 : Address,
-    token1 : Address,
-    fee : u16,
+    token0: Address,
+    token1: Address,
+    fee: u16,
     tick_spacing: i16,
-    pool_address : Address
+    pool_address: Address,
 }
 
 // 订阅池子创建
-pub async fn subscription_factory_pool_create(factory_address : Address, client : &Arc<Provider<Ws>>)  -> eyre::Result<(PoolCreate)> {
-
+pub async fn subscription_factory_pool_create(
+    factory_address: Address,
+    client: &Arc<Provider<Ws>>,
+) -> eyre::Result<PoolCreate> {
     abigen!(
-    Factory,
-    r#"[
+        Factory,
+        r#"[
         event PoolCreated(address indexed token0, address indexed token1,uint24 indexed fee,int24 tickSpacing,address pool)
     ]"#,
-);
+    );
 
     let factory_contract = Factory::new(factory_address, client.clone());
-    let events = factory_contract.event::<PoolCreatedFilter>().from_block(12369621);
+    let events = factory_contract
+        .event::<PoolCreatedFilter>()
+        .from_block(12369621);
     let mut stream = events.stream().await?.take(1);
 
-    let mut pool_create:PoolCreate = PoolCreate {
+    let mut pool_create: PoolCreate = PoolCreate {
         token0: Default::default(),
         token1: Default::default(),
         fee: 0,
@@ -46,17 +50,18 @@ pub async fn subscription_factory_pool_create(factory_address : Address, client 
     Ok(pool_create)
 }
 
-
-
-pub  async fn  subscription_pool_swap (pool_address :Address, client : &Arc<Provider<Ws>> )  -> eyre::Result<()>{
+pub async fn _subscription_pool_swap(
+    pool_address: Address,
+    client: &Arc<Provider<Ws>>,
+) -> eyre::Result<()> {
     abigen!(
-    UniswapPool,
-    r#"[
+        UniswapPool,
+        r#"[
         event Swap(address indexed sender,address indexed recipient,int256 amount0,int256 amount1,uint160 sqrtPriceX96,uint128 liquidity,int24 tick)
         function balance0() external view returns (uint256)
         function balance1() external view returns (uint256)
     ]"#,
-);
+    );
     let pool_contract = UniswapPool::new(pool_address, client.clone());
 
     let events = pool_contract.event::<SwapFilter>().from_block(19117504);
@@ -73,5 +78,4 @@ pub  async fn  subscription_pool_swap (pool_address :Address, client : &Arc<Prov
     }
 
     Ok(())
-
 }

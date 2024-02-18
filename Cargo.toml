@@ -1,5 +1,5 @@
 [package]
-name = "ListeningPool"
+name = "uniswap_v3_listen"
 version = "0.1.0"
 edition = "2021"
 
