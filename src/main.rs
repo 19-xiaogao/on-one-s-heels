@@ -4,6 +4,7 @@ mod logging;
 mod migrator;
 mod models;
 mod subscription;
+use crate::models::Model;
 use chrono::{Local, NaiveDateTime};
 
 #[tokio::main]
@@ -29,7 +30,10 @@ async fn main() -> eyre::Result<()> {
 
     let client = subscription::create_client(&config.block_chain.ws_url)
         .await
-        .unwrap_or_else(|err| panic!("create client error:{}", err));
+        .unwrap_or_else(|err| {
+            logging::log_error(&err.to_string());
+            panic!("create client error:{}", err);
+        });
     //  let uniswap_pool_address: Address = UNISWAP_POOL_ADDRESS.parse().unwrap();
     let uniswap_factory_address: Address = config
         .block_chain
@@ -57,6 +61,10 @@ async fn main() -> eyre::Result<()> {
                 create_time,
             },
         )
-        .await?;
+        .await
+        .unwrap_or_else(|err| {
+            logging::log_error(&err.to_string());
+            println!("insert pool err :{}", err);
+        });
     }
 }

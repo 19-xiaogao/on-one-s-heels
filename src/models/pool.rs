@@ -19,7 +19,7 @@ pub enum Relation {}
 
 impl ActiveModelBehavior for ActiveModel {}
 
-pub async fn insert_pool(db: &DbConn, from_data: Model) -> Result<Model, DbErr> {
+pub async fn insert_pool(db: &DbConn, from_data: Model) -> Result<(), DbErr> {
     ActiveModel {
         id: NotSet,
         token0: Set(from_data.token0.to_owned()),
@@ -30,5 +30,6 @@ pub async fn insert_pool(db: &DbConn, from_data: Model) -> Result<Model, DbErr> 
         create_time: Set(from_data.create_time.to_owned()),
     }
     .insert(db)
-    .await
+    .await?;
+    Ok(())
 }
