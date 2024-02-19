@@ -13,7 +13,7 @@ gas_price = 1000
 username = "root"
 password = "rootroot"
 host = "localhost"
-database_name = "uniswap_v3"
+database_name = "uniswap_v3_ethereum"
 max_connections = 100
 min_connections = 5
 
