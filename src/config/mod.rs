@@ -88,7 +88,7 @@ fn red_log_config(config: &Config) -> Result<Log, ConfigError> {
 
 pub fn read_config() -> Result<Configs, ConfigError> {
     // read current program env
-    let environment = env::var("RUST_ENV").unwrap_or_else(|_| "development".to_string());
+    let environment = env::var("ENVIRONMENT").unwrap_or_else(|_| "development".to_string());
     let mut config = Config::new();
     let mut file_path = String::new();
     if environment == "development" {
