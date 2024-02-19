@@ -1,5 +1,3 @@
-use std::env;
-
 use config::{Config, ConfigError, File};
 #[derive(Debug)]
 pub struct BlockChain {
@@ -86,11 +84,20 @@ fn red_log_config(config: &Config) -> Result<Log, ConfigError> {
     Ok(Log { log_dir })
 }
 
-pub fn read_config() -> Result<Configs, ConfigError> {
-    // read current program env
-    let environment = env::var("ENVIRONMENT").unwrap_or_else(|_| "development".to_string());
+fn read_env_config() -> Result<String, ConfigError> {
     let mut config = Config::new();
-    let mut file_path = String::new();
+    let mut env_file_path: String = String::new();
+    env_file_path.push_str("config/config.base.toml");
+    config.merge(File::with_name(env_file_path.as_str()))?;
+    let environment = config.get_str("environment")?;
+    Ok(environment)
+}
+
+pub fn read_config() -> Result<Configs, ConfigError> {
+    let mut config = Config::new();
+    let mut file_path: String = String::new();
+    let environment = read_env_config()?;
+    println!("environment::{}", environment);
     if environment == "development" {
         file_path.push_str("config/config.env.toml");
     } else {
