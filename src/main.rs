@@ -1,13 +1,11 @@
-use ethers::{abi::AbiEncode, prelude::*, utils::hex::ToHexExt};
+use ethers::{prelude::*, utils::hex::ToHexExt};
 mod config;
 mod logging;
 mod migrator;
 mod models;
 mod subscription;
 use chrono::{Local, NaiveDateTime};
-use log::kv::ToValue;
 
-//  需求: 监听 uniswap V3 factory 池子的创建。当第一次流动性的token 大于某值的时候, 买入一笔交易。
 #[tokio::main]
 async fn main() -> eyre::Result<()> {
     let config =

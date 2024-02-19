@@ -1,9 +1,4 @@
-use actix_web::http::uri::Authority;
-use sea_orm::{
-    entity::prelude::*,
-    ActiveValue::{self, NotSet},
-    IntoActiveModel, Set,
-};
+use sea_orm::{entity::prelude::*, ActiveValue::NotSet, Set};
 use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Deserialize, Serialize)]
 #[sea_orm(table_name = "pool")]
