@@ -1,4 +1,9 @@
-use sea_orm::{entity::prelude::*, Set};
+use actix_web::http::uri::Authority;
+use sea_orm::{
+    entity::prelude::*,
+    ActiveValue::{self, NotSet},
+    IntoActiveModel, Set,
+};
 use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Deserialize, Serialize)]
 #[sea_orm(table_name = "pool")]
@@ -21,13 +26,13 @@ impl ActiveModelBehavior for ActiveModel {}
 
 pub async fn insert_pool(db: &DbConn, from_data: Model) -> Result<Model, DbErr> {
     ActiveModel {
+        id: NotSet,
         token0: Set(from_data.token0.to_owned()),
         token1: Set(from_data.token1.to_owned()),
         pool_address: Set(from_data.pool_address.to_owned()),
         fee: Set(from_data.fee.to_owned()),
         tick_spacing: Set(from_data.tick_spacing.to_owned()),
         create_time: Set(from_data.create_time.to_owned()),
-        ..Default::default()
     }
     .insert(db)
     .await
