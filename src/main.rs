@@ -4,7 +4,6 @@ mod logging;
 mod migrator;
 mod models;
 mod subscription;
-use crate::models::Model;
 use chrono::{Local, NaiveDateTime};
 
 #[tokio::main]
