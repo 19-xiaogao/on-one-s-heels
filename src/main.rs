@@ -32,12 +32,15 @@ async fn main() -> eyre::Result<()> {
     let client = subscription::create_client(&config.block_chain.ws_url)
         .await
         .unwrap_or_else(|err| panic!("create client error:{}", err));
+    //  let uniswap_pool_address: Address = UNISWAP_POOL_ADDRESS.parse().unwrap();
     let uniswap_factory_address: Address = config
         .block_chain
         .uniswap_factory_v3_address
         .parse()
         .unwrap();
     loop {
+        // subscription::subscription_pool_swap(uniswap_pool_address, &client).await.expect("TODO: panic message");
+
         let pool_create =
             subscription::subscription_factory_pool_create(uniswap_factory_address, &client)
                 .await
