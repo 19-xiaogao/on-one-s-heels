@@ -1,9 +1,16 @@
+use chrono::{Local, NaiveDateTime};
 use ethers::contract::abigen;
 use ethers::prelude::{Address, Provider, StreamExt, Ws};
+use ethers::types::{U128, U256};
+use ethers::utils::hex::ToHexExt;
+use sea_orm::DatabaseConnection;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 mod client;
+
 pub(crate) use client::*;
+
+use crate::{logging, models};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct PoolCreate {
@@ -18,7 +25,8 @@ pub struct PoolCreate {
 pub async fn subscription_factory_pool_create(
     factory_address: Address,
     client: &Arc<Provider<Ws>>,
-) -> eyre::Result<PoolCreate> {
+    db: &DatabaseConnection,
+) {
     abigen!(
         Factory,
         r#"[
@@ -30,7 +38,7 @@ pub async fn subscription_factory_pool_create(
     let events = factory_contract
         .event::<PoolCreatedFilter>()
         .from_block(12369621);
-    let mut stream = events.stream().await?.take(1);
+    let mut stream = events.stream().await.unwrap().take(1);
 
     let mut pool_create: PoolCreate = PoolCreate {
         token0: Default::default(),
@@ -48,7 +56,68 @@ pub async fn subscription_factory_pool_create(
         pool_create.pool_address = val.pool;
     }
 
-    Ok(pool_create)
+    let create_time = NaiveDateTime::from_timestamp_opt(Local::now().timestamp(), 0).unwrap();
+    models::insert_pool(
+        &db,
+        models::Model {
+            id: Default::default(),
+            token0: pool_create.token0.encode_hex_with_prefix(),
+            token1: pool_create.token1.encode_hex_with_prefix(),
+            pool_address: pool_create.pool_address.encode_hex_with_prefix(),
+            fee: pool_create.fee as i32,
+            tick_spacing: pool_create.tick_spacing as i32,
+            create_time,
+        },
+    )
+    .await
+    .unwrap_or_else(|err| {
+        logging::log_error(&err.to_string());
+        println!("insert pool err :{}", err);
+    });
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct Mint {
+    pub token_id: U256,
+    pub liquidity: U128,
+    pub amount0: U256,
+    pub amount1: U256,
+}
+
+// 订阅同质化合约地址mint 事件
+pub async fn subscription_nonfungible_position_manager_mint(
+    nonfungible_position_manager_address: Address,
+    client: &Arc<Provider<Ws>>,
+) -> eyre::Result<Mint> {
+    abigen!(
+        NonfungiblePositionManager,
+        r#"[
+        event IncreaseLiquidity(uint256 tokenId,uint128 liquidity,uint256 amount0,uint256 amount1) 
+    ]"#,
+    );
+
+    let factory_contract =
+        NonfungiblePositionManager::new(nonfungible_position_manager_address, client.clone());
+    let events = factory_contract
+        .event::<IncreaseLiquidityFilter>()
+        .from_block(12369621);
+    let mut stream = events.stream().await?.take(1);
+
+    let mut mint = Mint {
+        token_id: Default::default(),
+        liquidity: Default::default(),
+        amount0: Default::default(),
+        amount1: Default::default(),
+    };
+
+    while let Some(Ok(f)) = stream.next().await {
+        mint.token_id = f.token_id;
+        mint.liquidity = f.liquidity.into();
+        mint.amount0 = f.amount_0;
+        mint.amount1 = f.amount_1;
+    }
+
+    Ok(mint)
 }
 
 pub async fn _subscription_pool_swap(
