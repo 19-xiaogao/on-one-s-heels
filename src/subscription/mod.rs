@@ -57,6 +57,7 @@ pub async fn subscription_factory_pool_create(
     }
 
     let create_time = NaiveDateTime::from_timestamp_opt(Local::now().timestamp(), 0).unwrap();
+
     models::insert_pool(
         &db,
         models::Model {
