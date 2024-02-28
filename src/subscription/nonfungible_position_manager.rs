@@ -18,16 +18,20 @@ pub struct Mint {
 
 abigen!(
     NonfungiblePositionManager,
-    "./src/abi/NonfungiblePositionManager.json",
+    r#"[
+    event IncreaseLiquidity(uint256 tokenId,uint128 liquidity,uint256 amount0,uint256 amount1) 
+    function positions(uint256 tokenId) external view override returns (uint96 nonce,address operator,address token0,address token1,uint24 fee,int24 tickLower,int24 tickUpper,uint128 liquidity,uint256 feeGrowthInside0LastX128,uint256 feeGrowthInside1LastX128,uint128 tokensOwed0,uint128 tokensOwed1) 
+    ]"#,
 );
+
 // 订阅同质化合约地址mint 事件
 pub async fn subscription_nonfungible_position_manager_mint(
     nonfungible_position_manager_address: Address,
     client: &Arc<Provider<Ws>>,
 ) -> eyre::Result<Mint> {
-    let factory_contract =
+    let nonfungible_contract =
         NonfungiblePositionManager::new(nonfungible_position_manager_address, client.clone());
-    let events = factory_contract
+    let events = nonfungible_contract
         .event::<IncreaseLiquidityFilter>()
         .from_block(12369621);
     let mut stream = events.stream().await?.take(1);
@@ -46,5 +50,12 @@ pub async fn subscription_nonfungible_position_manager_mint(
         mint.amount1 = f.amount_1;
     }
 
+    if let Ok(positions) = nonfungible_contract.positions(mint.token_id).call().await {
+        println!("positions: {:?}", positions);
+    }
+
+    let create_time = NaiveDateTime::from_timestamp_opt(Local::now().timestamp(), 0).unwrap();
+    let update_time = create_time.clone();
+    // models:
     Ok(mint)
 }

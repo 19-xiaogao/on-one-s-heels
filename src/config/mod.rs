@@ -5,6 +5,7 @@ pub struct BlockChain {
     pub ws_url: String,
     pub uniswap_factory_v3_address: String,
     pub uniswap_router_v3_address: String,
+    pub nonfungible_position_manager_address: String,
     pub usdt_address: String,
     pub usdc_address: String,
     pub weth_address: String,
@@ -46,6 +47,8 @@ pub fn read_block_chain_config(config: &Config) -> Result<BlockChain, ConfigErro
     let usdt_address = config.get_str("block_chain.usdt_address")?;
     let usdc_address = config.get_str("block_chain.usdc_address")?;
     let weth_address = config.get_str("block_chain.weth_address")?;
+    let nonfungible_position_manager_address =
+        config.get_str("block_chain.nonfungible_position_manager_address")?;
     let gas_price = config.get_int("block_chain.gas_price")?;
 
     Ok(BlockChain {
@@ -56,6 +59,7 @@ pub fn read_block_chain_config(config: &Config) -> Result<BlockChain, ConfigErro
         usdt_address,
         usdc_address,
         weth_address,
+        nonfungible_position_manager_address,
         gas_price: gas_price.try_into().unwrap(),
     })
 }

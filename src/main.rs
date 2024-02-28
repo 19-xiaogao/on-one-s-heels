@@ -39,8 +39,13 @@ async fn main() -> eyre::Result<()> {
         .uniswap_factory_v3_address
         .parse()
         .unwrap();
+
+        let nonfungible_position_manager_address:Address = config.block_chain.nonfungible_position_manager_address.parse().unwrap();
+
     loop {
         // subscription::subscription_pool_swap(uniswap_pool_address, &client).await.expect("TODO: panic message");
         subscription::subscription_factory_pool_create(uniswap_factory_address, &client, &db).await;
+        subscription::subscription_nonfungible_position_manager_mint(nonfungible_position_manager_address, &client).await;
+
     }
 }
