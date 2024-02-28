@@ -30,4 +30,3 @@ serde = { version = "1.0.189", features = ["derive"] }
 
 chrono = "0.4"
 
-async-std = "1.12.0"
