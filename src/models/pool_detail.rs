@@ -71,6 +71,5 @@ pub async fn query_pool_detail_for_token_id(
 }
 
 pub async fn update_pool_detail(db: &DbConn, token_id: u64, from_data: Model) -> Result<(), DbErr> {
-
     Ok(())
 }
