@@ -19,7 +19,10 @@ impl MigratorTrait for Migrator {
 pub async fn run(db: &DatabaseConnection) -> Result<(), DbErr> {
     let schema_manager = SchemaManager::new(db); // To investigate the schema
 
-    if schema_manager.has_table("pool").await? && schema_manager.has_table("pool_detail").await? {
+    let is_exit_pool_table = schema_manager.has_table("pool").await?;
+    let is_exit_pool_detail_table = schema_manager.has_table("pool_detail").await?;
+
+    if is_exit_pool_table && is_exit_pool_detail_table {
         println!("Table 'pool' already exists, skipping initialization.");
         println!("Table 'pool_detail' already exists, skipping initialization.");
         return Ok(());
