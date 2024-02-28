@@ -33,9 +33,9 @@ pub async fn subscription_nonfungible_position_manager_mint(
         NonfungiblePositionManager::new(nonfungible_position_manager_address, client.clone());
     let events = nonfungible_contract
         .event::<IncreaseLiquidityFilter>()
-        .from_block(12369621);
+        .from_block(4734414);
     let mut stream = events.stream().await?.take(1);
-
+    println!("aa");
     let mut mint = Mint {
         token_id: Default::default(),
         liquidity: Default::default(),
@@ -44,11 +44,13 @@ pub async fn subscription_nonfungible_position_manager_mint(
     };
 
     while let Some(Ok(f)) = stream.next().await {
+        println!("f:{:?}", f);
         mint.token_id = f.token_id;
         mint.liquidity = f.liquidity.into();
         mint.amount0 = f.amount_0;
         mint.amount1 = f.amount_1;
     }
+    println!("mint:{:?}", mint);
 
     if let Ok(positions) = nonfungible_contract.positions(mint.token_id).call().await {
         println!("positions: {:?}", positions);
