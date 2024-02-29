@@ -1,7 +1,7 @@
 use chrono::{Local, NaiveDateTime};
 use ethers::contract::abigen;
 use ethers::prelude::{Address, Provider, StreamExt, Ws};
-use ethers::types::{U128, U256};
+use ethers::types::U256;
 use ethers::utils::hex::ToHexExt;
 use sea_orm::DatabaseConnection;
 use serde::{Deserialize, Serialize};
