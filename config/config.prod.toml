@@ -4,6 +4,7 @@ chain_id = 1
 ws_url = "wss://mainnet.gateway.tenderly.co"
 uniswap_factory_v3_address = "0x1f98431c8ad98523631ae4a59f267346ea31f984"
 uniswap_router_v3_address = "0xe592427a0aece92de3edee1f18e0157c05861564"
+nonfungible_position_manager_address = "0xc36442b4a4522e871399cd717abdd847ab11fe88"
 usdt_address = "0xdAC17F958D2ee523a2206206994597C13D831ec7"
 usdc_address = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
 weth_address = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"

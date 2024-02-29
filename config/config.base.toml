@@ -1,4 +1,4 @@
 
 #production
 #development
-environment = "development"
+environment = "production"
