@@ -8,33 +8,34 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 
 use crate::{logging, models};
+
+use super::get_pool_address;
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Mint {
-    pub token_id: U256,
-    pub liquidity: U128,
-    pub amount0: U256,
-    pub amount1: U256,
+    pub token_id: String,
+    pub liquidity: String,
+    pub amount0: String,
+    pub amount1: String,
 }
 
 abigen!(
     NonfungiblePositionManager,
-    r#"[
-    event IncreaseLiquidity(uint256 tokenId,uint128 liquidity,uint256 amount0,uint256 amount1) 
-    function positions(uint256 tokenId) external view override returns (uint96 nonce,address operator,address token0,address token1,uint24 fee,int24 tickLower,int24 tickUpper,uint128 liquidity,uint256 feeGrowthInside0LastX128,uint256 feeGrowthInside1LastX128,uint128 tokensOwed0,uint128 tokensOwed1) 
-    ]"#,
+    "./src/abi/NonfungiblePositionManager.json"
 );
 
-// 订阅同质化合约地址mint 事件
+// subscription nonfungible contract mint event  and insert database data
 pub async fn subscription_nonfungible_position_manager_mint(
     nonfungible_position_manager_address: Address,
+    factory_address: Address,
     client: &Arc<Provider<Ws>>,
-) -> eyre::Result<Mint> {
+    db: &DatabaseConnection,
+) {
     let nonfungible_contract =
         NonfungiblePositionManager::new(nonfungible_position_manager_address, client.clone());
     let events = nonfungible_contract
         .event::<IncreaseLiquidityFilter>()
         .from_block(4734414);
-    let mut stream = events.stream().await?.take(1);
+    let mut stream = events.stream().await.unwrap().take(1);
     let mut mint = Mint {
         token_id: Default::default(),
         liquidity: Default::default(),
@@ -43,19 +44,71 @@ pub async fn subscription_nonfungible_position_manager_mint(
     };
 
     while let Some(Ok(f)) = stream.next().await {
-        mint.token_id = f.token_id;
-        mint.liquidity = f.liquidity.into();
-        mint.amount0 = f.amount_0;
-        mint.amount1 = f.amount_1;
-    }
-    println!("mint:{:?}", mint);
+        println!("IncreaseLiquidityFilter event: {f:?}");
 
-    if let Ok(positions) = nonfungible_contract.positions(mint.token_id).call().await {
+        mint.token_id = f.token_id.to_string();
+        mint.liquidity = f.liquidity.to_string();
+        mint.amount0 = f.amount_0.to_string();
+        mint.amount1 = f.amount_1.to_string();
+    }
+
+    if let Ok(positions) = nonfungible_contract
+        .positions(U256::from_dec_str(mint.token_id.as_str()).unwrap())
+        .call()
+        .await
+    {
         println!("positions: {:?}", positions);
-    }
+        let pool_address = get_pool_address(
+            factory_address,
+            &client.clone(),
+            positions.2,
+            positions.3,
+            positions.4,
+        )
+        .await
+        .unwrap();
+        let create_time = NaiveDateTime::from_timestamp_opt(Local::now().timestamp(), 0).unwrap();
+        let update_time = create_time.clone();
+        let pool_detail_result = models::query_pool_detail_for_token_id(db, mint.token_id.clone())
+            .await
+            .unwrap();
 
-    let create_time = NaiveDateTime::from_timestamp_opt(Local::now().timestamp(), 0).unwrap();
-    let update_time = create_time.clone();
-    // models:
-    Ok(mint)
+        let change_model = models::PoolDetailModel {
+            token_id: mint.token_id.parse().unwrap(),
+            amount0: mint.amount0,
+            amount1: mint.amount1,
+            pool_address: pool_address.encode_hex_with_prefix(),
+            nonce: positions.0 as i32,
+            operator: positions.1.encode_hex_with_prefix(),
+            token0: positions.2.encode_hex_with_prefix(),
+            token1: positions.3.encode_hex_with_prefix(),
+            fee: positions.4 as i32,
+            tick_lower: positions.5 as i32,
+            tick_upper: positions.6 as i32,
+            liquidity: positions.7.to_string(),
+            fee_growth_inside0_last_x128: (positions.8).to_string(),
+            fee_growth_inside1_last_x128: positions.9.to_string(),
+            tokens_owed0: positions.10 as i32,
+            tokens_owed1: positions.11 as i32,
+            create_time,
+            update_time,
+            id: Default::default(),
+        };
+
+        if pool_detail_result.len() <= 0 {
+            models::insert_pool_detail(db, change_model)
+                .await
+                .unwrap_or_else(|err| {
+                    logging::log_error(&err.to_string());
+                    println!("insert pool err :{}", err);
+                });
+        } else {
+            models::update_pool_detail(db, mint.token_id.clone(), change_model)
+                .await
+                .unwrap_or_else(|err| {
+                    logging::log_error(&err.to_string());
+                    println!("insert pool err :{}", err);
+                });
+        }
+    }
 }

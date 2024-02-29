@@ -17,19 +17,37 @@ pub struct PoolCreate {
     pub pool_address: Address,
 }
 
+abigen!(
+    Factory,
+    r#"[
+        event PoolCreated(address indexed token0, address indexed token1,uint24 indexed fee,int24 tickSpacing,address pool)
+        function getPool(address tokenA, address tokenB, uint24 fee) external view returns (address pool)
+    ]"#,
+);
+
+pub async fn get_pool_address(
+    factory_address: Address,
+    client: &Arc<Provider<Ws>>,
+    token_a: Address,
+    token_b: Address,
+    fee: u32,
+) -> Result<Address, ()> {
+    let factory_contract = Factory::new(factory_address, client.clone());
+
+    let pool_address = factory_contract
+        .get_pool(token_a, token_b, fee)
+        .call()
+        .await
+        .unwrap();
+    Ok(pool_address as Address)
+}
+
 // 订阅池子创建
 pub async fn subscription_factory_pool_create(
     factory_address: Address,
     client: &Arc<Provider<Ws>>,
     db: &DatabaseConnection,
 ) {
-    abigen!(
-        Factory,
-        r#"[
-        event PoolCreated(address indexed token0, address indexed token1,uint24 indexed fee,int24 tickSpacing,address pool)
-    ]"#,
-    );
-
     let factory_contract = Factory::new(factory_address, client.clone());
     let events = factory_contract
         .event::<PoolCreatedFilter>()

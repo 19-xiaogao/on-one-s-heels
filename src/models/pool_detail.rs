@@ -61,15 +61,39 @@ pub async fn insert_pool_detail(db: &DbConn, from_data: Model) -> Result<(), DbE
 
 pub async fn query_pool_detail_for_token_id(
     db: &DbConn,
-    token_id: u64,
+    token_id: String,
 ) -> Result<Vec<Model>, DbErr> {
     let result = Entity::find()
-        .filter(Column::TokenId.contains(token_id.to_string()))
+        .filter(Column::TokenId.contains(token_id))
         .all(db)
         .await?;
     Ok(result)
 }
 
-pub async fn update_pool_detail(db: &DbConn, token_id: u64, from_data: Model) -> Result<(), DbErr> {
+// if token id is exit , update pool detail
+pub async fn update_pool_detail(
+    db: &DbConn,
+    token_id: String,
+    from_data: Model,
+) -> Result<(), DbErr> {
+    let pool_detail: Option<Model> = Entity::find()
+        .filter(Column::TokenId.contains(token_id))
+        .one(db)
+        .await?;
+    let mut update_pool_detail: ActiveModel = pool_detail.unwrap().into();
+
+    update_pool_detail.amount0 = Set(from_data.amount0.to_owned());
+    update_pool_detail.amount1 = Set(from_data.amount1.to_owned());
+    update_pool_detail.liquidity = Set(from_data.liquidity.to_owned());
+    update_pool_detail.operator = Set(from_data.operator.to_owned());
+    update_pool_detail.nonce = Set(from_data.nonce.to_owned());
+    update_pool_detail.fee_growth_inside0_last_x128 =
+        Set(from_data.fee_growth_inside0_last_x128.to_owned());
+    update_pool_detail.fee_growth_inside1_last_x128 =
+        Set(from_data.fee_growth_inside1_last_x128.to_owned());
+    update_pool_detail.tokens_owed0 = Set(from_data.tokens_owed0.to_owned());
+    update_pool_detail.tokens_owed1 = Set(from_data.tokens_owed1.to_owned());
+    update_pool_detail.update_time = Set(from_data.update_time.to_owned());
+    update_pool_detail.update(db).await?;
     Ok(())
 }
