@@ -1,4 +1,5 @@
 use ethers::types::Address;
+use eyre::Ok;
 use tokio::task;
 mod config;
 mod logging;
@@ -45,24 +46,18 @@ async fn main() -> eyre::Result<()> {
         .nonfungible_position_manager_address
         .parse()
         .unwrap();
-    println!("address:{:?}", nonfungible_position_manager_address);
-    // subscription::subscription_pool_swap(uniswap_pool_address, &client).await.expect("TODO: panic message");
-
-    loop {
-        let cloned_client = client.clone();
-        let cloned_db = db.clone();
-        let cloned_factory_address = uniswap_factory_address.clone();
-        task::spawn(async move {
-            loop {
-                subscription::subscription_nonfungible_position_manager_mint(
-                    nonfungible_position_manager_address,
-                    cloned_factory_address,
-                    &cloned_client,
-                    &cloned_db,
-                )
-                .await;
-            }
-        });
-        subscription::subscription_factory_pool_create(uniswap_factory_address, &client, &db).await;
-    }
+    let cloned_client = client.clone();
+    let cloned_db = db.clone();
+    let cloned_factory_address = uniswap_factory_address.clone();
+    task::spawn(async move {
+        subscription::subscription_nonfungible_position_manager_mint(
+            nonfungible_position_manager_address,
+            cloned_factory_address,
+            &cloned_client,
+            &cloned_db,
+        )
+        .await;
+    });
+    subscription::subscription_factory_pool_create(uniswap_factory_address, &client, &db).await;
+    Ok(())
 }
