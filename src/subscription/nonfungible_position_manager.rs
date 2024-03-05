@@ -95,15 +95,15 @@ pub async fn subscription_nonfungible_position_manager_mint(
             id: Default::default(),
         };
 
-        if pool_detail_result.len() <= 0 {
-            models::insert_pool_detail(db, change_model)
+        if let Some(val) = pool_detail_result {
+            models::update_pool_detail(db, val.token_id.to_string(), change_model)
                 .await
                 .unwrap_or_else(|err| {
                     logging::log_error(&err.to_string());
                     println!("insert pool err :{}", err);
                 });
         } else {
-            models::update_pool_detail(db, mint.token_id.clone(), change_model)
+            models::insert_pool_detail(db, change_model)
                 .await
                 .unwrap_or_else(|err| {
                     logging::log_error(&err.to_string());

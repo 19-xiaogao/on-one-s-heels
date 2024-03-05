@@ -62,10 +62,10 @@ pub async fn insert_pool_detail(db: &DbConn, from_data: Model) -> Result<(), DbE
 pub async fn query_pool_detail_for_token_id(
     db: &DbConn,
     token_id: String,
-) -> Result<Vec<Model>, DbErr> {
+) -> Result<Option<Model>, DbErr> {
     let result = Entity::find()
         .filter(Column::TokenId.contains(token_id))
-        .all(db)
+        .one(db)
         .await?;
     Ok(result)
 }
