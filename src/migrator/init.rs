@@ -27,6 +27,9 @@ pub async fn run(db: &DatabaseConnection) -> Result<(), DbErr> {
         println!("Table 'pool_detail' already exists, skipping initialization.");
         return Ok(());
     };
+
+    // TODO: bug: if pool is exit, pool_detail is not exit, so just run Migrator::refresh() function ,before data all remove, reset table column,
+    // if afore add table? all data just remove.
     Migrator::refresh(db).await?;
     assert!(schema_manager.has_table("pool").await?);
     assert!(schema_manager.has_table("pool_detail").await?);
