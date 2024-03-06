@@ -10,7 +10,7 @@ use std::sync::Arc;
 use crate::{logging, models};
 
 use super::get_pool_address;
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize,Default)]
 pub struct Mint {
     pub token_id: String,
     pub liquidity: String,
@@ -37,10 +37,7 @@ pub async fn subscription_nonfungible_position_manager_mint(
         .from_block(4734414);
     let mut stream = events.stream().await.unwrap().take(1);
     let mut mint = Mint {
-        token_id: Default::default(),
-        liquidity: Default::default(),
-        amount0: Default::default(),
-        amount1: Default::default(),
+        ..Default::default()
     };
 
     while let Some(Ok(f)) = stream.next().await {
