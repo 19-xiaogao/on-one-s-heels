@@ -8,8 +8,10 @@ nonfungible_position_manager_address = "0xc36442b4a4522e871399cd717abdd847ab11fe
 usdt_address = "0xdAC17F958D2ee523a2206206994597C13D831ec7"
 usdc_address = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
 weth_address = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2"
+pool_address_v3 = "0xE936f0073549AD8b1fA53583600d629Ba9375161"
+pool_address_start_block = 4734414
 gas_price = 1000
- 
+
 [database]
 username = "root"
 password = "rootroot"

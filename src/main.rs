@@ -58,6 +58,16 @@ async fn main() -> eyre::Result<()> {
         )
         .await;
     });
+
+    /****************************************************************************************************************/
+    let cloned2_client = client.clone();
+    let pool_address: Address = config.block_chain.pool_address_v3.parse().unwrap();
+    let start_block_number = config.block_chain.pool_address_start_block;
+    task::spawn(async move {
+        subscription::subscription_pool(pool_address, start_block_number, &cloned2_client).await;
+    });
+    /****************************************************************************************************************/
     subscription::subscription_factory_pool_create(uniswap_factory_address, &client, &db).await;
+
     Ok(())
 }

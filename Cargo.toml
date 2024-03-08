@@ -29,4 +29,5 @@ web3 = "0.19"
 serde = { version = "1.0.189", features = ["derive"] }
 
 chrono = "0.4"
+bigdecimal = "0.3"
 

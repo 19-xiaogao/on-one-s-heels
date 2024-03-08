@@ -10,6 +10,8 @@ pub struct BlockChain {
     pub usdc_address: String,
     pub weth_address: String,
     pub gas_price: usize,
+    pub pool_address_v3: String,
+    pub pool_address_start_block: u64,
 }
 
 #[derive(Debug)]
@@ -51,6 +53,9 @@ pub fn read_block_chain_config(config: &Config) -> Result<BlockChain, ConfigErro
         config.get_str("block_chain.nonfungible_position_manager_address")?;
     let gas_price = config.get_int("block_chain.gas_price")?;
 
+    let pool_address_v3 = config.get_str("block_chain.pool_address_v3")?;
+    let pool_address_start_block = config.get_int("block_chain.pool_address_start_block")?;
+
     Ok(BlockChain {
         chain_id: chain_id.try_into().unwrap(),
         ws_url,
@@ -61,6 +66,8 @@ pub fn read_block_chain_config(config: &Config) -> Result<BlockChain, ConfigErro
         weth_address,
         nonfungible_position_manager_address,
         gas_price: gas_price.try_into().unwrap(),
+        pool_address_v3,
+        pool_address_start_block: pool_address_start_block.try_into().unwrap(),
     })
 }
 
