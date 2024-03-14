@@ -4,6 +4,8 @@ use env_logger::Builder;
 use log::LevelFilter;
 use std::fs::{self, File};
 use std::io::{self, Write};
+
+// init log
 pub fn init_log(log_dir: &str) -> io::Result<()> {
     // 创建日志文件夹
     fs::create_dir_all(log_dir)?;
@@ -29,13 +31,17 @@ pub fn init_log(log_dir: &str) -> io::Result<()> {
     Ok(())
 }
 
+// log info message
 pub fn _log_info(message: &str) {
     log::info!("{}", message);
 }
 
+// log error message
 pub fn log_error(message: &str) {
     log::error!("{}", message);
 }
+
+// log warn message
 pub fn log_warn(message: &str) {
     log::warn!("{}", message);
 }
