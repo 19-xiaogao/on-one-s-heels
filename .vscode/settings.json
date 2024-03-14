@@ -2,5 +2,8 @@
     "cSpell.words": [
         "bigdecimal",
         "Nonfungible"
+    ],
+    "rust-analyzer.linkedProjects": [
+        "./Cargo.toml"
     ]
 }

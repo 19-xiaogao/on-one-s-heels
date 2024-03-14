@@ -9,7 +9,7 @@ use crate::migrator::create_pool_table;
 #[async_trait::async_trait]
 impl MigratorTrait for Migrator {
     fn migrations() -> Vec<Box<dyn MigrationTrait>> {
-        vec![
+        vec![ 
             Box::new(create_pool_table::Migration),
             Box::new(create_pool_detail_table::Migration),
         ]

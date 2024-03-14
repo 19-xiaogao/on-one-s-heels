@@ -3,6 +3,7 @@ use ethers::contract::abigen;
 // use ethers::core::k256::sha2::digest::typenum::Pow;
 // use ethers::core::k256::U256;
 use ethers::prelude::{Address, Provider, StreamExt, Ws};
+use ethers::signers::Wallet;
 use std::sync::Arc;
 
 abigen!(V3_Pool, "./src/abi/v3_pool.json");
@@ -40,4 +41,8 @@ pub async fn subscription_pool(
 fn sqrt_price_x96_to_price_ratio(sqrt_price_x96: u128) -> f64 {
     let price_ratio = (sqrt_price_x96 as f64).powi(2) / (1u128 << 96) as f64;
     price_ratio
+}
+
+pub fn call_swap_contract() {
+    // let  wallet  = Wallet::new(rng)
 }
